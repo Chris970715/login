@@ -3,6 +3,7 @@ package hello.login.web.login;
 
 import hello.login.domain.login.LoginService;
 import hello.login.domain.member.Member;
+import hello.login.web.SessionConst;
 import hello.login.web.session.SessionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.net.http.HttpResponse;
 
 @Slf4j
@@ -65,7 +67,7 @@ public class LoginController {
     }
 
     // Adding Session
-    @PostMapping("/login")
+    //@PostMapping("/login")
     public String loginV2(@Validated @ModelAttribute("loginForm") LoginForm form, BindingResult bindingResult, HttpServletResponse httpResponse) {
 
         if(bindingResult.hasErrors()) {
@@ -87,6 +89,29 @@ public class LoginController {
         return "redirect:/";
     }
 
+    @PostMapping("/login")
+    public String loginV3(@Validated @ModelAttribute("loginForm") LoginForm form, BindingResult bindingResult, HttpServletRequest request) {
+
+        if(bindingResult.hasErrors()) {
+            return "login/loginForm";
+        }
+
+        Member loginMember = loginService.login(form.getLoginId(), form.getPassword());
+        // Id and Password is not found
+        if(loginMember == null) {
+            bindingResult.reject("loginFail", "Id or Password is incorrect");
+            return "login/loginForm";
+        }
+
+        //ToDo logic to manage login by using Cookie
+        // If session already exist, it will just return the existing one. If it does not, It will just create one
+        HttpSession session =  request.getSession();
+        // Add user's info in session
+        session.setAttribute(SessionConst.LOGIN_MEMBER, loginMember);
+
+        return "redirect:/";
+    }
+
 //    @PostMapping("/logout")
     public String logout(HttpServletResponse httpResponse) {
         // remove a cookie by removing time
@@ -94,7 +119,7 @@ public class LoginController {
         return "redirect:/";
     }
 
-    @PostMapping("/logout")
+    //@PostMapping("/logout")
     public String logoutV2(HttpServletRequest httpRequest) {
         // remove a cookie by removing time
         //expireCookie(httpResponse, "memberId");
@@ -102,6 +127,23 @@ public class LoginController {
         sessionManager.expire(httpRequest);
         return "redirect:/";
     }
+
+    @PostMapping("/logout")
+    public String logoutV3(HttpServletRequest httpRequest) {
+        // remove a cookie by removing time
+        //expireCookie(httpResponse, "memberId");
+
+        // Get session //true -> creates new session
+        HttpSession session = httpRequest.getSession(false);
+
+        if(session != null) {
+            // invalidate deletes session
+            session.invalidate();
+        }
+
+        return "redirect:/";
+    }
+
 
     private static void expireCookie(HttpServletResponse httpResponse, String cookieName) {
         Cookie cookie = new Cookie(cookieName, null);
