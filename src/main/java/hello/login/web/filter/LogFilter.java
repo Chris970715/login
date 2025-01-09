@@ -1,6 +1,7 @@
 package hello.login.web.filter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.PatternMatchUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +41,7 @@ public class LogFilter implements Filter {
         }
 
     }
+
 
     @Override
     public void destroy() {

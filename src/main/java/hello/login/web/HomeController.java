@@ -87,7 +87,6 @@ public class HomeController {
     @GetMapping("/")
     public String homeLoginV3Spring(
             @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) Member loginMember, Model model){
-        // by default, getSession creates new session. Therefore, false is recommanded
 
         // If session does not
         if(loginMember == null) {
