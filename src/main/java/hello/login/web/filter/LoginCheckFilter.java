@@ -46,7 +46,7 @@ public class LoginCheckFilter implements Filter {
                }
 
            }
-
+            //  To call next filter
            chain.doFilter(servletRequest, servletResponse);
 
          } catch (Exception e) {
