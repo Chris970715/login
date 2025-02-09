@@ -1,6 +1,7 @@
 package hello.login.web.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -24,20 +25,29 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         request.setAttribute(LOG_ID, uuid);
 
-        log.info("REQUEST [{}][{}][{}]", uuid, requestURI, handler);
+        log.info("requestURI: [{}][{}][{}]", uuid,requestURI, handler);
 
-        // true -> 
-        return true;
+        if(handler instanceof HandlerMethod) {
+            HandlerMethod handlerMethod = (HandlerMethod) handler; // It contains details of handler
+        }
+
+        return true; // true -> either next interceptor or handler
     }
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
+        log.info("postHandle [{}]", modelAndView);
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        Object logId =  request.getAttribute(LOG_ID);
+        String requestURI = request.getRequestURI();
+        Object logId =  (String) request.getAttribute(LOG_ID);
 
+        log.info("afterCompletion [{}][{}][{}]", logId, requestURI, handler);
+
+        if(ex != null) {
+            log.error("afterCompletion error!!", ex);
+        }
     }
 }
